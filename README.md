@@ -2,18 +2,22 @@
   <img src="./readme_logo.png" alt="PrismBrackets Logo" width="140"/>
 </p>
 
-<h1 align="center">PrismBrackets</h1>
+<h1 align="center">🌈 PrismBrackets</h1>
 
 <p align="center">
-  🌈 Depth-based rainbow bracket highlighting with glow and matching bracket detection for Visual Studio Code.
+  Rainbow bracket highlighting with glow, matching pairs, and smart nesting.
 </p>
 
 <p align="center">
-  Clean • Fast • Visual
+  Improve readability • Reduce errors • Code faster
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.0.1-blue" />
+  ✨ Clean code starts with clear brackets
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.1.0-blue" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/downloads-coming--soon-lightgrey" />
 </p>
@@ -22,7 +26,7 @@
   <a href="https://marketplace.visualstudio.com/items?itemName=Naveendev.prismbrackets">
     <img src="https://img.shields.io/badge/Install%20on-VS%20Code-blue?style=for-the-badge&logo=visualstudiocode" />
   </a>
-  
+
   <a href="https://marketplace.visualstudio.com/items?itemName=Naveendev.prismbrackets">
     <img src="https://img.shields.io/badge/View%20on-Marketplace-purple?style=for-the-badge&logo=visualstudiocode" />
   </a>
@@ -44,41 +48,13 @@ It helps you:
 
 ## ✨ Features
 
-### 🌈 Rainbow Bracket Highlighting
-
-* Unique color for each nesting level
-* Smooth cycling for deep nesting
-* Supports `()`, `{}`, `[]`
-
----
-
-### ✨ Glow Effect
-
-* Soft glow around brackets
-* Optimized for dark themes
-* Enhances visibility without distraction
-
----
-
-### 🎯 Matching Bracket Highlight
-
-* Highlights matching pair under cursor
-* Strong glow + border effect
-* Works instantly while navigating
-
----
-
-### 📌 Status Bar Indicator
-
-* Displays `PrismBrackets` in status bar
-* Confirms extension is active
-
----
-
-### ⚡ Real-time Updates
-
-* Updates instantly while typing
-* No reload required
+* 🌈 Depth-based rainbow bracket highlighting
+* ✨ Glow effect for better visibility
+* 🎯 Matching bracket highlight
+* ⚡ Real-time updates while typing
+* 🔘 Enable/Disable toggle (status bar)
+* 🧠 Ignores strings and comments
+* 🎨 Smooth dynamic color generation
 
 ---
 
@@ -120,7 +96,13 @@ function example() {
 
 ## 📦 Installation
 
-### From VSIX
+### 🔹 From Marketplace (Recommended)
+
+Click the install button above 👆
+
+---
+
+### 🔹 From VSIX
 
 ```bash
 code --install-extension prismbrackets.vsix
