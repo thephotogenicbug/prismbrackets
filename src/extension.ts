@@ -1,26 +1,110 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+// color palette
+const colors = [
+  "#ff0000", 
+  "#ffff00", 
+  "#00ff00",
+  "#00ffff",
+  "#ff00ff",
+  "#ff8800",
+  "#00ff88",
+  "#0088ff",
+  "#aa00ff",
+  "#ff0088",
+];
+
+// Create decorations once
+const decorationTypes = colors.map((color) =>
+  vscode.window.createTextEditorDecorationType({
+    color,
+    fontWeight: "bold",
+    textDecoration: "0 0 8px currentColor",
+  }),
+);
+
 export function activate(context: vscode.ExtensionContext) {
+  const hasShown = context.globalState.get("prismbrackets.welcomeShown");
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "prismbrackets" is now active!');
+  if (!hasShown) {
+    vscode.window.showInformationMessage("PrismBrackets activated ✨");
+    context.globalState.update("prismbrackets.welcomeShown", true);
+  }
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('prismbrackets.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from prismbrackets!');
-	});
+  // Status bar
+  const statusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100,
+  );
 
-	context.subscriptions.push(disposable);
+  statusBar.text = "🌈 PrismBrackets";
+  statusBar.tooltip = "PrismBrackets is active";
+  statusBar.show();
+
+  context.subscriptions.push(statusBar);
+
+  // Run immediately
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    colorizeBrackets(editor);
+  }
+
+  vscode.window.onDidChangeActiveTextEditor((editor) => {
+    if (editor) {
+      colorizeBrackets(editor);
+    }
+  });
+
+  vscode.workspace.onDidChangeTextDocument((event) => {
+    const editor = vscode.window.activeTextEditor;
+    if (editor && event.document === editor.document) {
+      colorizeBrackets(editor);
+    }
+  });
 }
 
-// This method is called when your extension is deactivated
+function colorizeBrackets(editor: vscode.TextEditor) {
+  const text = editor.document.getText();
+
+  let stack: string[] = [];
+
+  const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    // Opening
+    if ("({[".includes(char)) {
+      stack.push(char);
+      const depth = (stack.length - 1) % colors.length;
+
+      decorations[depth].push({
+        range: new vscode.Range(
+          editor.document.positionAt(i),
+          editor.document.positionAt(i + 1),
+        ),
+      });
+    }
+
+    // Closing
+    else if (")}]".includes(char)) {
+      const depth = (stack.length - 1) % colors.length;
+
+      decorations[depth].push({
+        range: new vscode.Range(
+          editor.document.positionAt(i),
+          editor.document.positionAt(i + 1),
+        ),
+      });
+
+      stack.pop();
+    }
+  }
+
+  // Apply (reuse decorations)
+  decorationTypes.forEach((decorationType, i) => {
+    editor.setDecorations(decorationType, decorations[i]);
+  });
+}
+
 export function deactivate() {}
