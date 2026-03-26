@@ -18,6 +18,16 @@
   <img src="https://img.shields.io/badge/downloads-coming--soon-lightgrey" />
 </p>
 
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=Naveendev.prismbrackets">
+    <img src="https://img.shields.io/badge/Install%20on-VS%20Code-blue?style=for-the-badge&logo=visualstudiocode" />
+  </a>
+  
+  <a href="https://marketplace.visualstudio.com/items?itemName=Naveendev.prismbrackets">
+    <img src="https://img.shields.io/badge/View%20on-Marketplace-purple?style=for-the-badge&logo=visualstudiocode" />
+  </a>
+</p>
+
 ---
 
 ## 🚀 Overview
