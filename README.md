@@ -60,7 +60,7 @@ It helps you:
 
 ## 🖼️ Preview
 
-### 🔥 Main Showcase
+### Main Showcase
 
 <p align="center">
   <img src="./showcase.png" width="700"/>
@@ -68,7 +68,7 @@ It helps you:
 
 ---
 
-### 🌈 Nested Depth Highlight
+### Nested Depth Highlight
 
 <p align="center">
   <img src="./nested_level.png" width="700"/>
@@ -76,7 +76,7 @@ It helps you:
 
 ---
 
-### 🧠 Mixed Brackets (Real Code)
+### Mixed Brackets 
 
 <p align="center">
   <img src="./mixed.png" width="700"/>
@@ -91,14 +91,6 @@ function example() {
   return (1 + (2 * (3 + (4 * (5 + (6))))));
 }
 ```
-
----
-
-## 📦 Installation
-
-### 🔹 From Marketplace (Recommended)
-
-Click the install button above 👆
 
 ---
 
