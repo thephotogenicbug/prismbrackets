@@ -4,9 +4,7 @@ import * as vscode from "vscode";
 let timeout: ReturnType<typeof setTimeout> | undefined;
 
 function triggerUpdate(editor: vscode.TextEditor) {
-  if (!editor) {
-    return;
-  }
+  if (!editor) return;
 
   if (timeout) {
     clearTimeout(timeout);
@@ -54,7 +52,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.globalState.update("prismbrackets.welcomeShown", true);
   }
 
-  // Status bar
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100,
@@ -66,21 +63,14 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(statusBar);
 
-  // dispose decorations
   decorationTypes.forEach((d) => context.subscriptions.push(d));
   context.subscriptions.push(matchDecoration);
 
-  // initial run
   const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    triggerUpdate(editor);
-  }
+  if (editor) triggerUpdate(editor);
 
-  // events
   vscode.window.onDidChangeActiveTextEditor((editor) => {
-    if (editor) {
-      triggerUpdate(editor);
-    }
+    if (editor) triggerUpdate(editor);
   });
 
   vscode.workspace.onDidChangeTextDocument((event) => {
@@ -106,7 +96,6 @@ function colorizeBrackets(editor: vscode.TextEditor) {
 
   const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
 
-  // proper stack with validation
   let stack: { char: string; index: number }[] = [];
   const depthMap: number[] = [];
 
@@ -116,9 +105,61 @@ function colorizeBrackets(editor: vscode.TextEditor) {
     "[": "]",
   };
 
+  // state flags
+  let inString = false;
+  let stringChar = "";
+  let inSingleLineComment = false;
+  let inMultiLineComment = false;
+
   for (let i = 0; i < fullText.length; i++) {
     const char = fullText[i];
+    const next = fullText[i + 1];
 
+    // comments
+    if (!inString && !inMultiLineComment && char === "/" && next === "/") {
+      inSingleLineComment = true;
+      i++;
+      continue;
+    }
+
+    if (!inString && !inSingleLineComment && char === "/" && next === "*") {
+      inMultiLineComment = true;
+      i++;
+      continue;
+    }
+
+    if (inSingleLineComment && char === "\n") {
+      inSingleLineComment = false;
+      continue;
+    }
+
+    if (inMultiLineComment && char === "*" && next === "/") {
+      inMultiLineComment = false;
+      i++;
+      continue;
+    }
+
+    if (inSingleLineComment || inMultiLineComment) {
+      continue;
+    }
+
+    // strings
+    if (!inString && ['"', "'", "`"].includes(char)) {
+      inString = true;
+      stringChar = char;
+      continue;
+    }
+
+    if (inString && char === stringChar) {
+      inString = false;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    // brackets
     if ("({[".includes(char)) {
       stack.push({ char, index: i });
       depthMap[i] = stack.length - 1;
@@ -129,12 +170,12 @@ function colorizeBrackets(editor: vscode.TextEditor) {
         depthMap[i] = stack.length - 1;
         stack.pop();
       } else {
-        depthMap[i] = 0; // invalid pair fallback
+        depthMap[i] = 0;
       }
     }
   }
 
-  // render only visible
+  // render visible safely
   for (const range of editor.visibleRanges) {
     const start = doc.offsetAt(range.start);
     const end = doc.offsetAt(range.end);
@@ -145,8 +186,10 @@ function colorizeBrackets(editor: vscode.TextEditor) {
       if ("(){}[]".includes(char)) {
         const depth = (depthMap[i] ?? 0) % colors.length;
 
+        const safeEnd = Math.min(i + 1, fullText.length);
+
         decorations[depth].push({
-          range: new vscode.Range(doc.positionAt(i), doc.positionAt(i + 1)),
+          range: new vscode.Range(doc.positionAt(i), doc.positionAt(safeEnd)),
         });
       }
     }
@@ -167,7 +210,7 @@ function highlightMatchingBracket(editor: vscode.TextEditor) {
   let char = text[index];
 
   if (!"(){}[]".includes(char) && index > 0) {
-    index = index - 1;
+    index--;
     char = text[index];
   }
 
