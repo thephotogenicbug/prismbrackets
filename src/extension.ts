@@ -1,43 +1,57 @@
 import * as vscode from "vscode";
 
+let isEnabled = true;
+let glowEnabled = true;
+
 // debounce
 let timeout: ReturnType<typeof setTimeout> | undefined;
 
 function triggerUpdate(editor: vscode.TextEditor) {
   if (!editor) return;
 
-  if (timeout) {
-    clearTimeout(timeout);
-  }
+  if (timeout) clearTimeout(timeout);
 
   timeout = setTimeout(() => {
     colorizeBrackets(editor);
   }, 80);
 }
 
-// color palette
-const colors = [
-  "#ff0000",
-  "#ffff00",
-  "#00ff00",
-  "#00ffff",
-  "#ff00ff",
-  "#ff8800",
-  "#00ff88",
-  "#0088ff",
-  "#aa00ff",
-  "#ff0088",
-];
+// clear decoration
+function clearAllDecorations(editor: vscode.TextEditor) {
+  decorationTypes.forEach((d) => editor.setDecorations(d, []));
+  editor.setDecorations(matchDecoration, []);
+}
 
-// decorations
-const decorationTypes = colors.map((color) =>
-  vscode.window.createTextEditorDecorationType({
-    color,
-    fontWeight: "bold",
-    textDecoration: "0 0 8px currentColor",
-  }),
-);
+// dynamic colors
+function generateColors(count: number): string[] {
+  const result: string[] = [];
 
+  for (let i = 0; i < count; i++) {
+    const hue = Math.floor((360 / count) * i);
+    result.push(`hsl(${hue}, 100%, 60%)`);
+  }
+
+  return result;
+}
+
+const colors = generateColors(24);
+
+// dynamic decorations
+let decorationTypes: vscode.TextEditorDecorationType[] = [];
+
+function createDecorations() {
+  decorationTypes.forEach((d) => d.dispose());
+
+  decorationTypes = colors.map((color) =>
+    vscode.window.createTextEditorDecorationType({
+      color,
+      fontWeight: "bold",
+      textDecoration: glowEnabled ? "0 0 8px currentColor" : "none",
+    }),
+  );
+}
+
+// match decoration
 const matchDecoration = vscode.window.createTextEditorDecorationType({
   border: "1px solid currentColor",
   textDecoration: "0 0 12px currentColor",
@@ -45,26 +59,33 @@ const matchDecoration = vscode.window.createTextEditorDecorationType({
 });
 
 export function activate(context: vscode.ExtensionContext) {
-  const hasShown = context.globalState.get("prismbrackets.welcomeShown");
+  createDecorations();
 
-  if (!hasShown) {
+  if (!context.globalState.get("prismbrackets.welcomeShown")) {
     vscode.window.showInformationMessage("PrismBrackets activated ✨");
     context.globalState.update("prismbrackets.welcomeShown", true);
   }
 
+  // 🔥 STATUS BAR
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100,
   );
 
-  statusBar.text = "🌈 PrismBrackets";
-  statusBar.tooltip = "PrismBrackets is active";
+  function updateStatusBar() {
+    statusBar.text = isEnabled ? "🌈 PrismBrackets" : "⚫ PrismBrackets OFF";
+
+    statusBar.tooltip = isEnabled
+      ? "Click to disable PrismBrackets"
+      : "Click to enable PrismBrackets";
+
+    statusBar.command = "prismbrackets.toggleEnable";
+  }
+
+  updateStatusBar();
   statusBar.show();
 
-  context.subscriptions.push(statusBar);
-
-  decorationTypes.forEach((d) => context.subscriptions.push(d));
-  context.subscriptions.push(matchDecoration);
+  context.subscriptions.push(statusBar, matchDecoration);
 
   const editor = vscode.window.activeTextEditor;
   if (editor) triggerUpdate(editor);
@@ -74,9 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   vscode.workspace.onDidChangeTextDocument((event) => {
-    if (!event.contentChanges.length) {
-      return;
-    }
+    if (!event.contentChanges.length) return;
 
     const editor = vscode.window.activeTextEditor;
     if (editor && event.document === editor.document) {
@@ -87,16 +106,65 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeTextEditorSelection((event) => {
     highlightMatchingBracket(event.textEditor);
   });
+
+  // Toggle Glow 
+  const toggleGlow = vscode.commands.registerCommand(
+    "prismbrackets.toggleGlow",
+    () => {
+      glowEnabled = !glowEnabled;
+
+      createDecorations();
+
+      const editor = vscode.window.activeTextEditor;
+
+      if (editor) {
+        clearAllDecorations(editor); // 🔥 FIX
+        triggerUpdate(editor); // 🔥 FIX
+      }
+
+      vscode.window.showInformationMessage(
+        `PrismBrackets Glow ${glowEnabled ? "Enabled ✨" : "Disabled"}`,
+      );
+    },
+  );
+
+  // Toggle Enable 
+  const toggleEnable = vscode.commands.registerCommand(
+    "prismbrackets.toggleEnable",
+    () => {
+      isEnabled = !isEnabled;
+
+      const editor = vscode.window.activeTextEditor;
+
+      if (editor) {
+        clearAllDecorations(editor); // 🔥 FIX
+
+        if (isEnabled) {
+          triggerUpdate(editor); // 🔥 FIX
+        }
+      }
+
+      updateStatusBar();
+
+      vscode.window.showInformationMessage(
+        `PrismBrackets ${isEnabled ? "Enabled 🌈" : "Disabled"}`,
+      );
+    },
+  );
+
+  context.subscriptions.push(toggleGlow, toggleEnable);
 }
 
 // main logic
 function colorizeBrackets(editor: vscode.TextEditor) {
+  if (!isEnabled) return;
+
   const doc = editor.document;
-  const fullText = doc.getText();
+  const text = doc.getText();
 
   const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
 
-  let stack: { char: string; index: number }[] = [];
+  let stack: string[] = [];
   const depthMap: number[] = [];
 
   const pairs: Record<string, string> = {
@@ -105,68 +173,56 @@ function colorizeBrackets(editor: vscode.TextEditor) {
     "[": "]",
   };
 
-  // state flags
   let inString = false;
   let stringChar = "";
-  let inSingleLineComment = false;
-  let inMultiLineComment = false;
+  let inSL = false;
+  let inML = false;
 
-  for (let i = 0; i < fullText.length; i++) {
-    const char = fullText[i];
-    const next = fullText[i + 1];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const n = text[i + 1];
 
     // comments
-    if (!inString && !inMultiLineComment && char === "/" && next === "/") {
-      inSingleLineComment = true;
+    if (!inString && !inML && c === "/" && n === "/") {
+      inSL = true;
       i++;
       continue;
     }
-
-    if (!inString && !inSingleLineComment && char === "/" && next === "*") {
-      inMultiLineComment = true;
+    if (!inString && !inSL && c === "/" && n === "*") {
+      inML = true;
       i++;
       continue;
     }
-
-    if (inSingleLineComment && char === "\n") {
-      inSingleLineComment = false;
+    if (inSL && c === "\n") {
+      inSL = false;
       continue;
     }
-
-    if (inMultiLineComment && char === "*" && next === "/") {
-      inMultiLineComment = false;
+    if (inML && c === "*" && n === "/") {
+      inML = false;
       i++;
       continue;
     }
-
-    if (inSingleLineComment || inMultiLineComment) {
-      continue;
-    }
+    if (inSL || inML) continue;
 
     // strings
-    if (!inString && ['"', "'", "`"].includes(char)) {
+    if (!inString && ['"', "'", "`"].includes(c)) {
       inString = true;
-      stringChar = char;
+      stringChar = c;
       continue;
     }
-
-    if (inString && char === stringChar) {
+    if (inString && c === stringChar) {
       inString = false;
       continue;
     }
-
-    if (inString) {
-      continue;
-    }
+    if (inString) continue;
 
     // brackets
-    if ("({[".includes(char)) {
-      stack.push({ char, index: i });
+    if ("({[".includes(c)) {
+      stack.push(c);
       depthMap[i] = stack.length - 1;
-    } else if (")}]".includes(char)) {
+    } else if (")}]".includes(c)) {
       const last = stack[stack.length - 1];
-
-      if (last && pairs[last.char] === char) {
+      if (last && pairs[last] === c) {
         depthMap[i] = stack.length - 1;
         stack.pop();
       } else {
@@ -175,18 +231,16 @@ function colorizeBrackets(editor: vscode.TextEditor) {
     }
   }
 
-  // render visible safely
   for (const range of editor.visibleRanges) {
     const start = doc.offsetAt(range.start);
     const end = doc.offsetAt(range.end);
 
     for (let i = start; i < end; i++) {
-      const char = fullText[i];
+      const c = text[i];
 
-      if ("(){}[]".includes(char)) {
+      if ("(){}[]".includes(c)) {
         const depth = (depthMap[i] ?? 0) % colors.length;
-
-        const safeEnd = Math.min(i + 1, fullText.length);
+        const safeEnd = Math.min(i + 1, text.length);
 
         decorations[depth].push({
           range: new vscode.Range(doc.positionAt(i), doc.positionAt(safeEnd)),
@@ -195,18 +249,17 @@ function colorizeBrackets(editor: vscode.TextEditor) {
     }
   }
 
-  decorationTypes.forEach((decorationType, i) => {
-    editor.setDecorations(decorationType, decorations[i]);
+  decorationTypes.forEach((d, i) => {
+    editor.setDecorations(d, decorations[i]);
   });
 }
 
-// matching highlight
+// matching brackets
 function highlightMatchingBracket(editor: vscode.TextEditor) {
   const doc = editor.document;
-  const pos = editor.selection.active;
   const text = doc.getText();
 
-  let index = doc.offsetAt(pos);
+  let index = doc.offsetAt(editor.selection.active);
   let char = text[index];
 
   if (!"(){}[]".includes(char) && index > 0) {
@@ -228,32 +281,24 @@ function highlightMatchingBracket(editor: vscode.TextEditor) {
     return;
   }
 
-  const isOpening = "({[".includes(char);
-  const matchChar = pairs[char];
+  const isOpen = "({[".includes(char);
+  const match = pairs[char];
 
   let stack = 0;
 
-  if (isOpening) {
+  if (isOpen) {
     for (let i = index + 1; i < text.length; i++) {
-      if (text[i] === char) {
-        stack++;
-      } else if (text[i] === matchChar) {
-        if (stack === 0) {
-          applyMatch(editor, index, i);
-          return;
-        }
+      if (text[i] === char) stack++;
+      else if (text[i] === match) {
+        if (stack === 0) return applyMatch(editor, index, i);
         stack--;
       }
     }
   } else {
     for (let i = index - 1; i >= 0; i--) {
-      if (text[i] === char) {
-        stack++;
-      } else if (text[i] === matchChar) {
-        if (stack === 0) {
-          applyMatch(editor, i, index);
-          return;
-        }
+      if (text[i] === char) stack++;
+      else if (text[i] === match) {
+        if (stack === 0) return applyMatch(editor, i, index);
         stack--;
       }
     }
@@ -262,16 +307,12 @@ function highlightMatchingBracket(editor: vscode.TextEditor) {
   editor.setDecorations(matchDecoration, []);
 }
 
-function applyMatch(editor: vscode.TextEditor, start: number, end: number) {
+function applyMatch(editor: vscode.TextEditor, s: number, e: number) {
   const doc = editor.document;
 
   editor.setDecorations(matchDecoration, [
-    {
-      range: new vscode.Range(doc.positionAt(start), doc.positionAt(start + 1)),
-    },
-    {
-      range: new vscode.Range(doc.positionAt(end), doc.positionAt(end + 1)),
-    },
+    { range: new vscode.Range(doc.positionAt(s), doc.positionAt(s + 1)) },
+    { range: new vscode.Range(doc.positionAt(e), doc.positionAt(e + 1)) },
   ]);
 }
 

@@ -31,8 +31,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "prismbrackets.helloWorld",
-        "title": "Hello World"
+        "command": "prismbrackets.toggleGlow",
+        "title": "PrismBrackets: Toggle Glow"
+      },
+      {
+        "command": "prismbrackets.toggleEnable",
+        "title": "PrismBrackets: Enable/Disable"
       }
     ]
   },
