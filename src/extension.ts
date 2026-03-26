@@ -1,5 +1,22 @@
 import * as vscode from "vscode";
 
+// debounce
+let timeout: ReturnType<typeof setTimeout> | undefined;
+
+function triggerUpdate(editor: vscode.TextEditor) {
+  if (!editor) {
+    return;
+  }
+
+  if (timeout) {
+    clearTimeout(timeout);
+  }
+
+  timeout = setTimeout(() => {
+    colorizeBrackets(editor);
+  }, 80);
+}
+
 // color palette
 const colors = [
   "#ff0000",
@@ -14,7 +31,7 @@ const colors = [
   "#ff0088",
 ];
 
-// create decorations once
+// decorations
 const decorationTypes = colors.map((color) =>
   vscode.window.createTextEditorDecorationType({
     color,
@@ -23,7 +40,6 @@ const decorationTypes = colors.map((color) =>
   }),
 );
 
-// matching bracket decoration
 const matchDecoration = vscode.window.createTextEditorDecorationType({
   border: "1px solid currentColor",
   textDecoration: "0 0 12px currentColor",
@@ -50,84 +66,110 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(statusBar);
 
-  // Run immediately
+  // dispose decorations
+  decorationTypes.forEach((d) => context.subscriptions.push(d));
+  context.subscriptions.push(matchDecoration);
+
+  // initial run
   const editor = vscode.window.activeTextEditor;
   if (editor) {
-    colorizeBrackets(editor);
+    triggerUpdate(editor);
   }
 
   // events
   vscode.window.onDidChangeActiveTextEditor((editor) => {
     if (editor) {
-      colorizeBrackets(editor);
+      triggerUpdate(editor);
     }
   });
 
   vscode.workspace.onDidChangeTextDocument((event) => {
+    if (!event.contentChanges.length) {
+      return;
+    }
+
     const editor = vscode.window.activeTextEditor;
     if (editor && event.document === editor.document) {
-      colorizeBrackets(editor);
+      triggerUpdate(editor);
     }
   });
 
-  // matching bracket listener 
   vscode.window.onDidChangeTextEditorSelection((event) => {
     highlightMatchingBracket(event.textEditor);
   });
 }
 
-// bracket coloring
+// main logic
 function colorizeBrackets(editor: vscode.TextEditor) {
-  const text = editor.document.getText();
+  const doc = editor.document;
+  const fullText = doc.getText();
 
-  let stack: string[] = [];
   const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
+  // proper stack with validation
+  let stack: { char: string; index: number }[] = [];
+  const depthMap: number[] = [];
 
-    // opening
+  const pairs: Record<string, string> = {
+    "(": ")",
+    "{": "}",
+    "[": "]",
+  };
+
+  for (let i = 0; i < fullText.length; i++) {
+    const char = fullText[i];
+
     if ("({[".includes(char)) {
-      stack.push(char);
-      const depth = (stack.length - 1) % colors.length;
+      stack.push({ char, index: i });
+      depthMap[i] = stack.length - 1;
+    } else if (")}]".includes(char)) {
+      const last = stack[stack.length - 1];
 
-      decorations[depth].push({
-        range: new vscode.Range(
-          editor.document.positionAt(i),
-          editor.document.positionAt(i + 1),
-        ),
-      });
-    }
-
-    // closing
-    else if (")}]".includes(char)) {
-      const depth = (stack.length - 1) % colors.length;
-
-      decorations[depth].push({
-        range: new vscode.Range(
-          editor.document.positionAt(i),
-          editor.document.positionAt(i + 1),
-        ),
-      });
-
-      stack.pop();
+      if (last && pairs[last.char] === char) {
+        depthMap[i] = stack.length - 1;
+        stack.pop();
+      } else {
+        depthMap[i] = 0; // invalid pair fallback
+      }
     }
   }
 
-  // apply colors
+  // render only visible
+  for (const range of editor.visibleRanges) {
+    const start = doc.offsetAt(range.start);
+    const end = doc.offsetAt(range.end);
+
+    for (let i = start; i < end; i++) {
+      const char = fullText[i];
+
+      if ("(){}[]".includes(char)) {
+        const depth = (depthMap[i] ?? 0) % colors.length;
+
+        decorations[depth].push({
+          range: new vscode.Range(doc.positionAt(i), doc.positionAt(i + 1)),
+        });
+      }
+    }
+  }
+
   decorationTypes.forEach((decorationType, i) => {
     editor.setDecorations(decorationType, decorations[i]);
   });
 }
 
-// highlight matching brackets
+// matching highlight
 function highlightMatchingBracket(editor: vscode.TextEditor) {
   const doc = editor.document;
   const pos = editor.selection.active;
   const text = doc.getText();
 
-  const index = doc.offsetAt(pos);
-  const char = text[index];
+  let index = doc.offsetAt(pos);
+  let char = text[index];
+
+  if (!"(){}[]".includes(char) && index > 0) {
+    index = index - 1;
+    char = text[index];
+  }
 
   const pairs: Record<string, string> = {
     "(": ")",
@@ -150,8 +192,9 @@ function highlightMatchingBracket(editor: vscode.TextEditor) {
 
   if (isOpening) {
     for (let i = index + 1; i < text.length; i++) {
-      if (text[i] === char) {stack++;}
-      else if (text[i] === matchChar) {
+      if (text[i] === char) {
+        stack++;
+      } else if (text[i] === matchChar) {
         if (stack === 0) {
           applyMatch(editor, index, i);
           return;
@@ -161,8 +204,9 @@ function highlightMatchingBracket(editor: vscode.TextEditor) {
     }
   } else {
     for (let i = index - 1; i >= 0; i--) {
-      if (text[i] === char) {stack++;}
-      else if (text[i] === matchChar) {
+      if (text[i] === char) {
+        stack++;
+      } else if (text[i] === matchChar) {
         if (stack === 0) {
           applyMatch(editor, i, index);
           return;
@@ -175,7 +219,6 @@ function highlightMatchingBracket(editor: vscode.TextEditor) {
   editor.setDecorations(matchDecoration, []);
 }
 
-// apply highlight
 function applyMatch(editor: vscode.TextEditor, start: number, end: number) {
   const doc = editor.document;
 
