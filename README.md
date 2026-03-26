@@ -1,71 +1,140 @@
-# prismbrackets README
+<p align="center">
+  <img src="./readme_logo.png" alt="PrismBrackets Logo" width="140"/>
+</p>
 
-This is the README for your extension "prismbrackets". After writing up a brief description, we recommend including the following sections.
+<h1 align="center">PrismBrackets</h1>
 
-## Features
+<p align="center">
+  🌈 Depth-based rainbow bracket highlighting with glow and matching bracket detection for Visual Studio Code.
+</p>
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+<p align="center">
+  Clean • Fast • Visual
+</p>
 
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.0.1-blue" />
+  <img src="https://img.shields.io/badge/license-MIT-green" />
+  <img src="https://img.shields.io/badge/downloads-coming--soon-lightgrey" />
+</p>
 
 ---
 
-## Following extension guidelines
+## 🚀 Overview
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+PrismBrackets enhances your coding experience by applying **colorful, depth-based highlighting** to brackets, combined with a subtle glow and real-time matching.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+It helps you:
 
-## Working with Markdown
+* Understand deeply nested code instantly
+* Reduce visual confusion
+* Improve focus and readability
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+---
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+## ✨ Features
 
-## For more information
+### 🌈 Rainbow Bracket Highlighting
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+* Unique color for each nesting level
+* Smooth cycling for deep nesting
+* Supports `()`, `{}`, `[]`
 
-**Enjoy!**
+---
+
+### ✨ Glow Effect
+
+* Soft glow around brackets
+* Optimized for dark themes
+* Enhances visibility without distraction
+
+---
+
+### 🎯 Matching Bracket Highlight
+
+* Highlights matching pair under cursor
+* Strong glow + border effect
+* Works instantly while navigating
+
+---
+
+### 📌 Status Bar Indicator
+
+* Displays `PrismBrackets` in status bar
+* Confirms extension is active
+
+---
+
+### ⚡ Real-time Updates
+
+* Updates instantly while typing
+* No reload required
+
+---
+
+## 🖼️ Preview
+
+### 🔥 Main Showcase
+
+<p align="center">
+  <img src="./showcase.png" width="700"/>
+</p>
+
+---
+
+### 🌈 Nested Depth Highlight
+
+<p align="center">
+  <img src="./nested_level.png" width="700"/>
+</p>
+
+---
+
+### 🧠 Mixed Brackets (Real Code)
+
+<p align="center">
+  <img src="./mixed.png" width="700"/>
+</p>
+
+---
+
+## 🧪 Example
+
+```js
+function example() {
+  return (1 + (2 * (3 + (4 * (5 + (6))))));
+}
+```
+
+---
+
+## 📦 Installation
+
+### From VSIX
+
+```bash
+code --install-extension prismbrackets.vsix
+```
+
+---
+
+## 🛠 Development
+
+```bash
+npm install
+npm run watch
+```
+
+Press `F5` to run the extension.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+<p align="center">
+  Built for developers who love clean code ✨
+</p>

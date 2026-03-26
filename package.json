@@ -1,7 +1,7 @@
 {
   "name": "prismbrackets",
-  "displayName": "prismbrackets",
-  "description": "Beautiful colorful bracket highlighting + terminal colors",
+  "displayName": "PrismBrackets",
+  "description": "Beautiful colorful bracket highlighting",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.110.0"
@@ -9,10 +9,10 @@
   "categories": [
     "Other"
   ],
- "activationEvents": [
-  "onLanguage:javascript",
-  "onLanguage:typescript"
-],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -39,5 +39,7 @@
     "typescript": "^5.9.3",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2"
-  }
+  },
+  "icon": "assets/icon.png",
+  "license": "MIT"
 }
