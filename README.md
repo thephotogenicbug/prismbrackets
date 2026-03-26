@@ -102,13 +102,6 @@ Click the install button above 👆
 
 ---
 
-### 🔹 From VSIX
-
-```bash
-code --install-extension prismbrackets.vsix
-```
-
----
 
 ## 🛠 Development
 
