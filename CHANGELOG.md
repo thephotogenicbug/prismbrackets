@@ -1,9 +1,12 @@
-# Change Log
+# PrismBrackets v0.1.0
 
-All notable changes to the "prismbrackets" extension will be documented in this file.
+## Features
+- 🌈 Dynamic rainbow bracket colors (HSL-based)
+- ✨ Glow toggle support
+- 🔘 Enable/Disable toggle (status bar + command)
+- 🧠 Ignore brackets inside strings and comments
+- ⚡ Performance improvements (debounce + visible range)
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+## Fixes
+- Fixed decoration refresh bug
+- Fixed range safety issues
