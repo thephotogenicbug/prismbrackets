@@ -1,31 +1,41 @@
 {
   "name": "prismbrackets",
   "displayName": "Prism Brackets - Rainbow Bracket Highlighter",
-  "description": "Rainbow bracket highlighting with glow effect and matching bracket highlight for JavaScript, TypeScript, JSON and more in VS Code.",
-  "version": "0.1.0",
+  "description": "Rainbow bracket highlighting with glow, theme-aware colors, multi-language support, and smart parsing for improved code readability in VS Code.",
+  "version": "0.2.0",
   "publisher": "Naveendev",
   "engines": {
     "vscode": "^1.110.0"
   },
   "categories": [
     "Programming Languages",
+    "Linters",
     "Other"
   ],
   "keywords": [
     "rainbow brackets",
     "bracket colorizer",
     "bracket highlighter",
-    "color brackets",
+    "color brackets vscode",
     "nested brackets",
-    "vscode brackets",
+    "bracket pair colorizer",
+    "vscode bracket extension",
+    "rainbow parentheses",
     "syntax highlighting",
     "code readability",
-    "developer tools"
+    "developer tools",
+    "highlight brackets",
+    "matching brackets",
+    "code visualization",
+    "programming productivity",
+    "rainbow indentation",
+    "bracket nesting",
+    "code clarity",
+    "vscode extension",
+    "developer experience"
   ],
   "activationEvents": [
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:json"
+    "*"
   ],
   "main": "./out/extension.js",
   "contributes": {

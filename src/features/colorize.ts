@@ -1,12 +1,17 @@
 import * as vscode from "vscode";
 import { isEnabled } from "../state";
 import { decorationTypes } from "../decorations/decorations";
+import { getLanguageConfig } from "../utils/languageConfig";
 
 export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
   if (!isEnabled) return;
 
   const doc = editor.document;
+
+  if (["plaintext", "markdown", "log"].includes(doc.languageId)) return;
+
   const text = doc.getText();
+  const lang = getLanguageConfig(doc.languageId);
 
   const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
 
@@ -23,43 +28,64 @@ export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
   let stringChar = "";
   let inSL = false;
   let inML = false;
+  let mlEnd = "";
 
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
-    const n = text[i + 1];
 
-    if (!inString && !inML && c === "/" && n === "/") {
-      inSL = true;
-      i++;
-      continue;
+    // --- Single line comment ---
+    if (!inString && !inML && lang.singleLineComments) {
+      for (const sl of lang.singleLineComments) {
+        if (text.startsWith(sl, i)) {
+          inSL = true;
+          i += sl.length - 1;
+          continue;
+        }
+      }
     }
-    if (!inString && !inSL && c === "/" && n === "*") {
-      inML = true;
-      i++;
-      continue;
+
+    // --- Multi-line comment start ---
+    if (!inString && !inSL && lang.multiLineComments) {
+      for (const [start, end] of lang.multiLineComments) {
+        if (text.startsWith(start, i)) {
+          inML = true;
+          mlEnd = end;
+          i += start.length - 1;
+          continue;
+        }
+      }
     }
+
+    // --- End single-line ---
     if (inSL && c === "\n") {
       inSL = false;
       continue;
     }
-    if (inML && c === "*" && n === "/") {
+
+    // --- End multi-line ---
+    if (inML && text.startsWith(mlEnd, i)) {
       inML = false;
-      i++;
+      i += mlEnd.length - 1;
       continue;
     }
+
     if (inSL || inML) continue;
 
-    if (!inString && ['"', "'", "`"].includes(c)) {
+    // --- Strings ---
+    if (!inString && lang.stringDelimiters.includes(c)) {
       inString = true;
       stringChar = c;
       continue;
     }
+
     if (inString && c === stringChar) {
       inString = false;
       continue;
     }
+
     if (inString) continue;
 
+    // --- Brackets ---
     if ("({[".includes(c)) {
       stack.push(c);
       depthMap[i] = stack.length - 1;
@@ -74,6 +100,7 @@ export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
     }
   }
 
+  // Apply only to visible ranges
   for (const range of editor.visibleRanges) {
     const start = doc.offsetAt(range.start);
     const end = doc.offsetAt(range.end);

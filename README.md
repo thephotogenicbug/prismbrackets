@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="./readme_logo.png" alt="PrismBrackets Logo" width="140"/>
+  <img src="./readme_logo.png" alt="PrismBrackets Logo" width="340"/>
 </p>
 
-<h1 align="center">🌈 PrismBrackets</h1>
+<h1 align="center">🌈 Prism Brackets</h1>
 
 <p align="center">
-  Rainbow bracket highlighting with glow, matching pairs, and smart nesting.
+  Advanced rainbow bracket highlighting with glow, multi-language support, and smart parsing.
 </p>
 
 <p align="center">
@@ -17,9 +17,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-blue" />
+  <img src="https://img.shields.io/badge/version-0.2.0-blue" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
-  <img src="https://img.shields.io/badge/downloads-coming--soon-lightgrey" />
 </p>
 
 <p align="center">
@@ -36,25 +35,28 @@
 
 ## 🚀 Overview
 
-PrismBrackets enhances your coding experience by applying **colorful, depth-based highlighting** to brackets, combined with a subtle glow and real-time matching.
-
-It helps you:
-
-* Understand deeply nested code instantly
-* Reduce visual confusion
-* Improve focus and readability
+PrismBrackets enhances your coding experience with **depth-based rainbow bracket highlighting**, glow effects, and intelligent parsing across multiple programming languages.
 
 ---
 
 ## ✨ Features
 
-* 🌈 Depth-based rainbow bracket highlighting
-* ✨ Glow effect for better visibility
-* 🎯 Matching bracket highlight
-* ⚡ Real-time updates while typing
-* 🔘 Enable/Disable toggle (status bar)
-* 🧠 Ignores strings and comments
-* 🎨 Smooth dynamic color generation
+- 🌈 Depth-based rainbow bracket highlighting
+- 🎨 Advanced color system (better distribution, less repetition)
+- 🌗 Theme-aware colors (auto adjusts for dark/light mode)
+- ✨ Glow effect
+- 🎯 Matching bracket highlight
+- ⚡ Real-time updates while typing
+- 🔘 Enable/Disable toggle (status bar)
+- 🧠 Ignores strings and comments
+- 🌍 Multi-language support:
+  - JavaScript / TypeScript
+  - Python
+  - HTML / JSON
+  - SQL
+  - C / C++
+  - Java
+  - PHP / Laravel Blade (partial)
 
 ---
 
@@ -76,7 +78,7 @@ It helps you:
 
 ---
 
-### Mixed Brackets 
+### Mixed Brackets
 
 <p align="center">
   <img src="./mixed.png" width="700"/>
@@ -88,30 +90,6 @@ It helps you:
 
 ```js
 function example() {
-  return (1 + (2 * (3 + (4 * (5 + (6))))));
+  return 1 + 2 * (3 + 4 * (5 + 6));
 }
 ```
-
----
-
-
-## 🛠 Development
-
-```bash
-npm install
-npm run watch
-```
-
-Press `F5` to run the extension.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.
-
----
-
-<p align="center">
-  Built for developers who love clean code ✨
-</p>
