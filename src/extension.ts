@@ -6,6 +6,7 @@ import { colorizeBrackets } from "./features/colorize";
 import { highlightMatchingBracket } from "./features/match";
 import { registerCommands } from "./commands/toggle";
 import { isEnabled } from "./state";
+import { highlightBracketErrors } from "./features/errors";
 
 export function activate(context: vscode.ExtensionContext) {
   // Theme updates
@@ -13,9 +14,10 @@ export function activate(context: vscode.ExtensionContext) {
   createDecorations(colors);
 
   const run = (editor: vscode.TextEditor) => {
-    triggerUpdate(editor, (e: vscode.TextEditor) =>
-      colorizeBrackets(e, colors),
-    );
+    triggerUpdate(editor, (e: vscode.TextEditor) => {
+      colorizeBrackets(e, colors);
+      highlightBracketErrors(e);
+    });
   };
 
   // Status bar
