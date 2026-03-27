@@ -2,7 +2,7 @@
   "name": "prismbrackets",
   "displayName": "Prism Brackets - Rainbow Bracket Highlighter",
   "description": "Rainbow bracket highlighting with glow, theme-aware colors, multi-language support, and smart parsing for improved code readability in VS Code.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "Naveendev",
   "engines": {
     "vscode": "^1.110.0"
