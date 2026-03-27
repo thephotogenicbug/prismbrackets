@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./readme_logo.png" alt="PrismBrackets Logo" width="340"/>
+  <img src="assets/readme_logo.png" alt="PrismBrackets Logo" width="340"/>
 </p>
 
 <h1 align="center">🌈 Prism Brackets</h1>
@@ -40,18 +40,6 @@
 **PrismBrackets** enhances your coding experience with:
 
 - 🌈 Depth-based rainbow bracket highlighting
-- ✨ Glow effects for better visibility
-- 🧠 Intelligent parsing (ignores strings/comments)
-- ⚡ Real-time updates while typing
-
-Designed for **clarity, performance, and developer productivity**.
-
----
-
-
-## ✨ Features
-
-- 🌈 Depth-based rainbow bracket highlighting
 - 🎨 Advanced color system (less repetition, better spacing)
 - 🌗 Theme-aware colors (auto adapts to dark/light themes)
 - ✨ Glow effect for enhanced visibility
@@ -59,6 +47,11 @@ Designed for **clarity, performance, and developer productivity**.
 - ⚡ Real-time updates while typing
 - 🔘 Enable/Disable toggle (status bar)
 - 🧠 Smart parsing (ignores strings & comments)
+
+
+Designed for **clarity, performance, and developer productivity**.
+
+---
 
 ### 🌍 Supported Languages
 
@@ -77,19 +70,19 @@ Designed for **clarity, performance, and developer productivity**.
 ### Main Showcase
 
 <p align="center">
-  <img src="./showcase.png" width="700"/>
+  <img src="assets/showcase.png" width="700"/>
 </p>
 
 ### Nested Depth Highlight
 
 <p align="center">
-  <img src="./nested_level.png" width="700"/>
+  <img src="assets/nested_level.png" width="700"/>
 </p>
 
 ### Mixed Brackets
 
 <p align="center">
-  <img src="./mixed.png" width="700"/>
+  <img src="assets/mixed.png" width="700"/>
 </p>
 
 ---
