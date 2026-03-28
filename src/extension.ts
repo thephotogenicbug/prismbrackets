@@ -7,6 +7,7 @@ import { highlightMatchingBracket } from "./features/match";
 import { registerCommands } from "./commands/toggle";
 import { isEnabled } from "./state";
 import { highlightBracketErrors } from "./features/errors";
+import { highlightScope } from "./features/scope";
 
 export function activate(context: vscode.ExtensionContext) {
   // Theme updates
@@ -53,6 +54,10 @@ export function activate(context: vscode.ExtensionContext) {
       if (editor) run(editor);
     }),
   );
+
+  vscode.window.onDidChangeTextEditorSelection((event) => {
+    highlightScope(event.textEditor);
+  });
 
   // Document change
   context.subscriptions.push(

@@ -32,6 +32,10 @@ export function createDecorations(colors: string[]) {
   );
 }
 
+export const scopeDecoration = vscode.window.createTextEditorDecorationType({
+  backgroundColor: "rgba(255,255,255,0.05)",
+});
+
 // Clear all decorations
 export function clearAll(editor: vscode.TextEditor) {
   // clear rainbow brackets
