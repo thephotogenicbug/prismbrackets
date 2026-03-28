@@ -4,15 +4,15 @@ import { focusDecoration } from "../decorations/decorations";
 export function applyFocusMode(editor: vscode.TextEditor) {
   const doc = editor.document;
 
-  const visibleRange = editor.visibleRanges[0];
-  const startOffset = doc.offsetAt(visibleRange.start);
-  const endOffset = doc.offsetAt(visibleRange.end);
+  // Clear previous focus
+  editor.setDecorations(focusDecoration, []);
 
-  const text = doc.getText(
-    new vscode.Range(doc.positionAt(startOffset), doc.positionAt(endOffset)),
-  );
+  const visible = editor.visibleRanges[0];
+  if (!visible) {return;}
 
-  const cursorOffset = doc.offsetAt(editor.selection.active) - startOffset;
+  const text = doc.getText(visible);
+  const baseOffset = doc.offsetAt(visible.start);
+  const cursorOffset = doc.offsetAt(editor.selection.active) - baseOffset;
 
   const pairs: Record<string, string> = {
     "{": "}",
@@ -29,7 +29,7 @@ export function applyFocusMode(editor: vscode.TextEditor) {
   const stack: { char: string; index: number }[] = [];
   const scopes: { start: number; end: number }[] = [];
 
-  // Build scopes inside visible range
+  // Build scopes
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
 
@@ -45,7 +45,7 @@ export function applyFocusMode(editor: vscode.TextEditor) {
     }
   }
 
-  // Find closest (innermost) scope
+  // Find innermost scope
   let target: { start: number; end: number } | null = null;
 
   for (const s of scopes) {
@@ -56,32 +56,21 @@ export function applyFocusMode(editor: vscode.TextEditor) {
     }
   }
 
-  // Apply dimming
-  if (!target) {
-    editor.setDecorations(focusDecoration, []);
-    return;
-  }
+  if (!target) {return;}
 
-  const absoluteStart = target.start + startOffset;
-  const absoluteEnd = target.end + startOffset;
+  const absStart = target.start + baseOffset;
+  const absEnd = target.end + baseOffset;
 
   const ranges: vscode.Range[] = [];
 
-  // before scope
-  if (absoluteStart > 0) {
-    ranges.push(
-      new vscode.Range(doc.positionAt(0), doc.positionAt(absoluteStart)),
-    );
+  // Before scope
+  if (absStart > baseOffset) {
+    ranges.push(new vscode.Range(visible.start, doc.positionAt(absStart)));
   }
 
-  // after scope
-  if (absoluteEnd < doc.getText().length) {
-    ranges.push(
-      new vscode.Range(
-        doc.positionAt(absoluteEnd + 1),
-        doc.positionAt(doc.getText().length),
-      ),
-    );
+  // After scope
+  if (absEnd < doc.offsetAt(visible.end)) {
+    ranges.push(new vscode.Range(doc.positionAt(absEnd + 1), visible.end));
   }
 
   editor.setDecorations(focusDecoration, ranges);

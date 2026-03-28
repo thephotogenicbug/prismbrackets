@@ -13,11 +13,9 @@ import { applyFocusMode } from "./features/focus";
 import { highlightHoverPair } from "./features/hoverPair";
 
 export function activate(context: vscode.ExtensionContext) {
-  // Initialize colors
   let colors = generateColors(60);
   createDecorations(colors);
 
-  // Main runner
   const run = (editor: vscode.TextEditor) => {
     triggerUpdate(editor, (e: vscode.TextEditor) => {
       colorizeBrackets(e, colors);
@@ -45,22 +43,17 @@ export function activate(context: vscode.ExtensionContext) {
   statusBar.show();
   context.subscriptions.push(statusBar);
 
-  // Initial run
   const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    run(editor);
-  }
+  if (editor) run(editor);
 
-  // Editor switch
+  // Editor change
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
-      if (editor) {
-        run(editor);
-      }
+      if (editor) run(editor);
     }),
   );
 
-  // Document changes
+  // Document change
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
       const editor = vscode.window.activeTextEditor;
@@ -77,42 +70,35 @@ export function activate(context: vscode.ExtensionContext) {
       createDecorations(colors);
 
       const editor = vscode.window.activeTextEditor;
-      if (editor) {
-        run(editor);
-      }
+      if (editor) run(editor);
     }),
   );
 
-  // SINGLE selection handler
   context.subscriptions.push(
     vscode.window.onDidChangeTextEditorSelection((event) => {
       const editor = event.textEditor;
 
-      // Always apply these
       highlightMatchingBracket(editor);
       highlightScope(editor);
 
-      // Get character under cursor
       const pos = editor.selection.active;
       const char = editor.document.getText(
         new vscode.Range(pos, pos.translate(0, 1)),
       );
 
-      // If cursor is on a bracket
+      // always apply focus
+      applyFocusMode(editor);
+
+      // apply hover (on top)
       if ("(){}[]".includes(char)) {
         highlightHoverPair(editor);
       } else {
-        // Otherwise apply focus mode
-        highlightHoverPair(editor); // clears hover
-        applyFocusMode(editor);
+        highlightHoverPair(editor); // clears
       }
     }),
   );
 
-  // Tooltip
   registerTooltip(context);
-
-  // Commands
   registerCommands(context, run, updateStatusBar);
 }
 

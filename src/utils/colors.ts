@@ -1,27 +1,38 @@
 import * as vscode from "vscode";
 
 export function generateColors(count: number): string[] {
-  const result: string[] = [];
+  const colors: string[] = [];
 
-  // Detect VS Code theme
   const isDark =
     vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark;
 
   for (let i = 0; i < count; i++) {
+    // Golden angle distribution
     const hue = (i * 137.508) % 360;
 
-    // Dynamic saturation
-    const saturation = isDark
-      ? 75 + (i % 3) * 10 // 75–95% (bright for dark theme)
-      : 60 + (i % 3) * 10; // 60–80% (softer for light theme)
+    // Smooth saturation variation
+    const satBase = isDark ? 70 : 60;
+    const saturation =
+      satBase + Math.sin(i * 0.25) * 10 + Math.cos(i * 0.13) * 5;
 
-    // Dynamic lightness
-    const lightness = isDark
-      ? 60 + (i % 4) * 6 // brighter
-      : 40 + (i % 4) * 6; // darker
+    // Advanced lightness curve
+    const lightBase = isDark ? 55 : 50;
+    const lightness =
+      lightBase + Math.sin(i * 0.4) * 12 + Math.cos(i * 0.18) * 6;
 
-    result.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+    colors.push(
+      `hsl(${hue}, ${clamp(saturation, 40, 90)}%, ${clamp(
+        lightness,
+        isDark ? 45 : 35,
+        isDark ? 75 : 70,
+      )}%)`,
+    );
   }
 
-  return result;
+  return colors;
+}
+
+// keep values safe
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
 }

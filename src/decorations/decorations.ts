@@ -39,7 +39,6 @@ export const scopeDecoration = vscode.window.createTextEditorDecorationType({
 export const focusDecoration = vscode.window.createTextEditorDecorationType({
   opacity: "0.25",
 });
-
 export const hoverPairDecoration = vscode.window.createTextEditorDecorationType(
   {
     border: "1px solid currentColor",
