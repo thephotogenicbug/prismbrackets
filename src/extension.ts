@@ -8,9 +8,10 @@ import { registerCommands } from "./commands/toggle";
 import { isEnabled } from "./state";
 import { highlightBracketErrors } from "./features/errors";
 import { highlightScope } from "./features/scope";
+import { registerTooltip } from "./features/tooltip";
 
 export function activate(context: vscode.ExtensionContext) {
-  // Theme updates
+  // Theme colors
   let colors = generateColors(60);
   createDecorations(colors);
 
@@ -39,7 +40,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   updateStatusBar();
   statusBar.show();
-
   context.subscriptions.push(statusBar);
 
   // Initial run
@@ -55,9 +55,15 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
-  vscode.window.onDidChangeTextEditorSelection((event) => {
-    highlightScope(event.textEditor);
-  });
+  // selection events
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+      const editor = event.textEditor;
+
+      highlightMatchingBracket(editor);
+      highlightScope(editor);
+    }),
+  );
 
   // Document change
   context.subscriptions.push(
@@ -66,13 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
       if (editor && event.document === editor.document) {
         run(editor);
       }
-    }),
-  );
-
-  // Cursor movement
-  context.subscriptions.push(
-    vscode.window.onDidChangeTextEditorSelection((event) => {
-      highlightMatchingBracket(event.textEditor);
     }),
   );
 
@@ -89,6 +88,10 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
+  // Tooltip
+  registerTooltip(context);
+
+  // Commands
   registerCommands(context, run, updateStatusBar);
 }
 
