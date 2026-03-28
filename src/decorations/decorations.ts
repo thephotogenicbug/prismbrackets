@@ -36,6 +36,16 @@ export const scopeDecoration = vscode.window.createTextEditorDecorationType({
   backgroundColor: "rgba(255,255,255,0.05)",
 });
 
+export const focusDecoration = vscode.window.createTextEditorDecorationType({
+  opacity: "0.25",
+});
+
+export const hoverPairDecoration = vscode.window.createTextEditorDecorationType(
+  {
+    border: "1px solid currentColor",
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+);
 // Clear all decorations
 export function clearAll(editor: vscode.TextEditor) {
   // clear rainbow brackets
