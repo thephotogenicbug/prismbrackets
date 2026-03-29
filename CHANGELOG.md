@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.2.2] - 2026-03-29
+
+### ✨ Added
+- Scope border glow for active code block
+- Vertical scope guide line for better structure visualization
+- Theme-aware scope decorations (dark/light support)
+
+### ⚡ Improvements
+- Optimized decoration lifecycle (initialized once, updated on theme change)
+- Added parser caching to avoid repeated ignore map computation
+- Reduced unnecessary updates during cursor movement
+- Improved rendering performance and smoothness
+
+### 🧠 Enhancements
+- More stable scope detection with reduced flickering
+- Improved visual clarity for nested blocks
+- Better consistency across different themes and languages
+
+### 🐛 Fixes
+- Fixed unnecessary decoration re-creation causing performance overhead
+- Fixed vertical guide rendering compatibility (removed unsupported properties)
+- Minor stability and performance fixes
+
+---
+
 ## [0.2.1] - 2026-03-27
 
 ### ✨ Added

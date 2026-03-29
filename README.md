@@ -1,3 +1,7 @@
+# Prism Brackets – Rainbow Bracket Highlighter for VS Code
+
+Fast, zero-lag rainbow bracket highlighting with scope visualization, vertical guides, and smart parsing.
+
 <p align="center">
   <img src="assets/readme_logo.png" alt="PrismBrackets Logo" width="340"/>
 </p>
@@ -37,7 +41,7 @@
 
 ## 🚀 Overview
 
-**Prism Brackets** enhances your coding experience with:
+**PrismBrackets** enhances your coding experience with:
 
 - 🌈 Depth-based rainbow bracket highlighting
 - 🎨 Advanced color system (less repetition, better spacing)
@@ -101,7 +105,6 @@ Designed for **clarity, performance, and developer productivity**.
 function example() {
   return 1 + 2 * (3 + 4 * (5 + 6));
 }
-```
 
 ## 📦 Installation
 
