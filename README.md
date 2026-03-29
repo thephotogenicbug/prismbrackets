@@ -37,7 +37,7 @@
 
 ## 🚀 Overview
 
-**PrismBrackets** enhances your coding experience with:
+**Prism Brackets** enhances your coding experience with:
 
 - 🌈 Depth-based rainbow bracket highlighting
 - 🎨 Advanced color system (less repetition, better spacing)
@@ -47,7 +47,7 @@
 - ⚡ Real-time updates while typing
 - 🔘 Enable/Disable toggle (status bar)
 - 🧠 Smart parsing (ignores strings & comments)
-
+- 🎯 Focus Mode (dim non-active code & highlight current scope)
 
 Designed for **clarity, performance, and developer productivity**.
 
@@ -83,6 +83,14 @@ Designed for **clarity, performance, and developer productivity**.
 
 <p align="center">
   <img src="assets/mixed.png" width="700"/>
+</p>
+
+---
+
+## 🎯 Focus Mode
+
+<p align="center">
+  <img src="assets/focus_mode.png" width="700"/>
 </p>
 
 ---

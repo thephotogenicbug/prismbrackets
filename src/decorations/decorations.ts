@@ -10,7 +10,7 @@ export const matchDecoration = vscode.window.createTextEditorDecorationType({
   fontWeight: "bold",
 });
 
-// Error - unmatched brackets
+// Error decoration
 export const errorDecoration = vscode.window.createTextEditorDecorationType({
   color: "#ff5555",
   fontWeight: "bold",
@@ -35,12 +35,16 @@ export const scopeDecoration = vscode.window.createTextEditorDecorationType({
   backgroundColor: "rgba(255,255,255,0.05)",
 });
 
-// Dynamic scope border (theme-aware)
+// Lifecycle
 let scopeBorderDecoration: vscode.TextEditorDecorationType;
+let scopeLineDecoration: vscode.TextEditorDecorationType;
 
-export function createScopeBorderDecoration() {
+export function initScopeDecorations() {
   if (scopeBorderDecoration) {
     scopeBorderDecoration.dispose();
+  }
+  if (scopeLineDecoration) {
+    scopeLineDecoration.dispose();
   }
 
   const isDark =
@@ -54,22 +58,25 @@ export function createScopeBorderDecoration() {
     borderRadius: "4px",
   });
 
-  return scopeBorderDecoration;
-}
-
-// Vertical scope guide
-export const scopeLineDecoration = vscode.window.createTextEditorDecorationType(
-  {
+  scopeLineDecoration = vscode.window.createTextEditorDecorationType({
     border: "none",
     borderWidth: "0 0 0 2px",
     borderStyle: "solid",
-    borderColor: "rgba(255,255,255,0.15)",
-  },
-);
+    borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.25)",
+  });
+}
+
+export function getScopeBorderDecoration() {
+  return scopeBorderDecoration;
+}
+
+export function getScopeLineDecoration() {
+  return scopeLineDecoration;
+}
 
 // Focus mode
 export const focusDecoration = vscode.window.createTextEditorDecorationType({
-  opacity: "0.8",
+  opacity: "0.7",
 });
 
 // Hover pair
@@ -80,7 +87,7 @@ export const hoverPairDecoration = vscode.window.createTextEditorDecorationType(
   },
 );
 
-// Clear all decorations
+// Clear all
 export function clearAll(editor: vscode.TextEditor) {
   decorationTypes.forEach((d) => editor.setDecorations(d, []));
   editor.setDecorations(matchDecoration, []);

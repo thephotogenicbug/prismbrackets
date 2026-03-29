@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import {
   scopeDecoration,
-  createScopeBorderDecoration,
-  scopeLineDecoration,
+  getScopeBorderDecoration,
+  getScopeLineDecoration,
 } from "../decorations/decorations";
 
 export function highlightScope(editor: vscode.TextEditor) {
@@ -11,8 +11,8 @@ export function highlightScope(editor: vscode.TextEditor) {
 
   const cursorOffset = doc.offsetAt(editor.selection.active);
 
-  // create dynamic border (theme-aware)
-  const scopeBorderDecoration = createScopeBorderDecoration();
+  const scopeBorderDecoration = getScopeBorderDecoration();
+  const scopeLineDecoration = getScopeLineDecoration();
 
   for (const visible of visibleRanges) {
     const text = doc.getText(visible);
@@ -34,7 +34,6 @@ export function highlightScope(editor: vscode.TextEditor) {
           const absStart = baseOffset + start;
           const absEnd = baseOffset + i;
 
-          // skip tiny scopes
           if (absEnd - absStart < 20) {
             continue;
           }
@@ -43,23 +42,19 @@ export function highlightScope(editor: vscode.TextEditor) {
             const startPos = doc.positionAt(absStart);
             const endPos = doc.positionAt(absEnd + 1);
 
-            const fullRange = new vscode.Range(startPos, endPos);
+            const range = new vscode.Range(startPos, endPos);
 
-            // background highlight
-            editor.setDecorations(scopeDecoration, [fullRange]);
+            editor.setDecorations(scopeDecoration, [range]);
+            editor.setDecorations(scopeBorderDecoration, [range]);
 
-            // border glow
-            editor.setDecorations(scopeBorderDecoration, [fullRange]);
+            const lines: vscode.Range[] = [];
 
-            // vertical guide line
-            const lineRanges: vscode.Range[] = [];
-
-            for (let line = startPos.line; line <= endPos.line; line++) {
-              const lineStart = doc.lineAt(line).range.start;
-              lineRanges.push(new vscode.Range(lineStart, lineStart));
+            for (let l = startPos.line; l <= endPos.line; l++) {
+              const lineStart = doc.lineAt(l).range.start;
+              lines.push(new vscode.Range(lineStart, lineStart));
             }
 
-            editor.setDecorations(scopeLineDecoration, lineRanges);
+            editor.setDecorations(scopeLineDecoration, lines);
 
             return;
           }
@@ -68,7 +63,6 @@ export function highlightScope(editor: vscode.TextEditor) {
     }
   }
 
-  // clear all when no scope
   editor.setDecorations(scopeDecoration, []);
   editor.setDecorations(scopeLineDecoration, []);
 }

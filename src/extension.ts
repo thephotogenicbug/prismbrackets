@@ -1,7 +1,11 @@
 import * as vscode from "vscode";
 import { generateColors } from "./utils/colors";
 import { triggerUpdate } from "./utils/debounce";
-import { createDecorations } from "./decorations/decorations";
+import {
+  createDecorations,
+  initScopeDecorations,
+} from "./decorations/decorations";
+
 import { colorizeBrackets } from "./features/colorize";
 import { highlightMatchingBracket } from "./features/match";
 import { registerCommands } from "./commands/toggle";
@@ -14,7 +18,10 @@ import { highlightHoverPair } from "./features/hoverPair";
 
 export function activate(context: vscode.ExtensionContext) {
   let colors = generateColors(60);
+
+  // initialize decorations
   createDecorations(colors);
+  initScopeDecorations();
 
   // heavy operations (debounced)
   const runHeavy = (editor: vscode.TextEditor) => {
@@ -40,14 +47,14 @@ export function activate(context: vscode.ExtensionContext) {
     highlightHoverPair(editor);
   };
 
-  // status bar
+  // Statusbar
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100,
   );
 
   function updateStatusBar() {
-    statusBar.text = isEnabled ? "🌈 PrismBrackets" : "⚫ PrismBrackets OFF";
+    statusBar.text = isEnabled ? "🌈 PB: ON" : "⚫ PB: OFF";
 
     statusBar.tooltip = isEnabled
       ? "Click to disable PrismBrackets"
@@ -58,6 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   updateStatusBar();
   statusBar.show();
+
   context.subscriptions.push(statusBar);
 
   // initial run
@@ -87,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
-  // cursor movement → light only
+  // cursor movement
   context.subscriptions.push(
     vscode.window.onDidChangeTextEditorSelection((event) => {
       runLight(event.textEditor);
@@ -98,7 +106,9 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.onDidChangeActiveColorTheme(() => {
       colors = generateColors(60);
+
       createDecorations(colors);
+      initScopeDecorations();
 
       const editor = vscode.window.activeTextEditor;
       if (editor) {
@@ -108,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
-  // hover tooltip
+  // tooltip
   registerTooltip(context);
 
   // commands
