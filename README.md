@@ -21,7 +21,7 @@ Fast, zero-lag rainbow bracket highlighting with scope visualization, vertical g
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.0-blue" />
+  <img src="https://img.shields.io/badge/version-0.2.2-blue" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/VSCode-Extension-blue?logo=visualstudiocode" />
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" />
@@ -101,7 +101,7 @@ Designed for **clarity, performance, and developer productivity**.
 
 ## 🧪 Example
 
-```js
+````js
 function example() {
   return 1 + 2 * (3 + 4 * (5 + 6));
 }
@@ -110,7 +110,7 @@ function example() {
 
 ```bash
 ext install Naveendev.prismbrackets
-```
+````
 
 ---
 
