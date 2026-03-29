@@ -1,16 +1,35 @@
 import * as vscode from "vscode";
 import { matchDecoration } from "../decorations/decorations";
+import { buildIgnoreMap } from "../utils/parser";
 
 export function highlightMatchingBracket(editor: vscode.TextEditor) {
   const doc = editor.document;
-  const text = doc.getText();
+  const visible = editor.visibleRanges[0];
+  if (!visible) {
+    return;
+  }
 
-  let index = doc.offsetAt(editor.selection.active);
+  const text = doc.getText(visible);
+  const baseOffset = doc.offsetAt(visible.start);
+
+  const { ignore } = buildIgnoreMap(text, doc.languageId);
+
+  let index = doc.offsetAt(editor.selection.active) - baseOffset;
+
+  if (index < 0 || index >= text.length) {
+    return;
+  }
+
   let char = text[index];
 
   if (!"(){}[]".includes(char) && index > 0) {
     index--;
     char = text[index];
+  }
+
+  if (ignore[index]) {
+    editor.setDecorations(matchDecoration, []);
+    return;
   }
 
   const pairs: Record<string, string> = {
@@ -23,7 +42,6 @@ export function highlightMatchingBracket(editor: vscode.TextEditor) {
   };
 
   if (!pairs[char]) {
-    editor.setDecorations(matchDecoration, []);
     return;
   }
 
@@ -34,17 +52,31 @@ export function highlightMatchingBracket(editor: vscode.TextEditor) {
 
   if (isOpen) {
     for (let i = index + 1; i < text.length; i++) {
-      if (text[i] === char) stack++;
-      else if (text[i] === match) {
-        if (stack === 0) return applyMatch(editor, index, i);
+      if (ignore[i]) {
+        continue;
+      }
+
+      if (text[i] === char) {
+        stack++;
+      } else if (text[i] === match) {
+        if (stack === 0) {
+          return apply(editor, baseOffset, index, i);
+        }
         stack--;
       }
     }
   } else {
     for (let i = index - 1; i >= 0; i--) {
-      if (text[i] === char) stack++;
-      else if (text[i] === match) {
-        if (stack === 0) return applyMatch(editor, i, index);
+      if (ignore[i]) {
+        continue;
+      }
+
+      if (text[i] === char) {
+        stack++;
+      } else if (text[i] === match) {
+        if (stack === 0) {
+          return apply(editor, baseOffset, i, index);
+        }
         stack--;
       }
     }
@@ -53,11 +85,21 @@ export function highlightMatchingBracket(editor: vscode.TextEditor) {
   editor.setDecorations(matchDecoration, []);
 }
 
-function applyMatch(editor: vscode.TextEditor, s: number, e: number) {
+function apply(editor: vscode.TextEditor, base: number, s: number, e: number) {
   const doc = editor.document;
 
   editor.setDecorations(matchDecoration, [
-    { range: new vscode.Range(doc.positionAt(s), doc.positionAt(s + 1)) },
-    { range: new vscode.Range(doc.positionAt(e), doc.positionAt(e + 1)) },
+    {
+      range: new vscode.Range(
+        doc.positionAt(base + s),
+        doc.positionAt(base + s + 1),
+      ),
+    },
+    {
+      range: new vscode.Range(
+        doc.positionAt(base + e),
+        doc.positionAt(base + e + 1),
+      ),
+    },
   ]);
 }

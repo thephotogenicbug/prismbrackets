@@ -1,11 +1,26 @@
 import * as vscode from "vscode";
 import { hoverPairDecoration } from "../decorations/decorations";
+import { buildIgnoreMap } from "../utils/parser";
 
 export function highlightHoverPair(editor: vscode.TextEditor) {
   const doc = editor.document;
+  const visible = editor.visibleRanges[0];
+  if (!visible) {
+    return;
+  }
+
+  const text = doc.getText(visible);
+  const baseOffset = doc.offsetAt(visible.start);
+
+  const { ignore } = buildIgnoreMap(text, doc.languageId);
+
   const pos = editor.selection.active;
-  const text = doc.getText();
-  const offset = doc.offsetAt(pos);
+  const offset = doc.offsetAt(pos) - baseOffset;
+
+  if (offset < 0 || offset >= text.length) {
+    editor.setDecorations(hoverPairDecoration, []);
+    return;
+  }
 
   const char = text[offset];
 
@@ -21,7 +36,7 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
     "]": "[",
   };
 
-  if (!pairs[char] && !reverse[char]) {
+  if ((!pairs[char] && !reverse[char]) || ignore[offset]) {
     editor.setDecorations(hoverPairDecoration, []);
     return;
   }
@@ -30,7 +45,12 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
 
   if (pairs[char]) {
     let depth = 0;
+
     for (let i = offset; i < text.length; i++) {
+      if (ignore[i]) {
+        continue;
+      }
+
       if (text[i] === char) {
         depth++;
       } else if (text[i] === pairs[char]) {
@@ -44,7 +64,12 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
     }
   } else {
     let depth = 0;
+
     for (let i = offset; i >= 0; i--) {
+      if (ignore[i]) {
+        continue;
+      }
+
       if (text[i] === char) {
         depth++;
       } else if (text[i] === reverse[char]) {
@@ -59,15 +84,13 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
   }
 
   if (matchIndex !== null) {
-    const ranges = [
+    editor.setDecorations(hoverPairDecoration, [
       new vscode.Range(pos, pos.translate(0, 1)),
       new vscode.Range(
-        doc.positionAt(matchIndex),
-        doc.positionAt(matchIndex + 1),
+        doc.positionAt(baseOffset + matchIndex),
+        doc.positionAt(baseOffset + matchIndex + 1),
       ),
-    ];
-
-    editor.setDecorations(hoverPairDecoration, ranges);
+    ]);
   } else {
     editor.setDecorations(hoverPairDecoration, []);
   }

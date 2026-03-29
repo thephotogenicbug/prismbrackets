@@ -3,29 +3,40 @@ import { scopeDecoration } from "../decorations/decorations";
 
 export function highlightScope(editor: vscode.TextEditor) {
   const doc = editor.document;
-  const pos = editor.selection.active;
-  const text = doc.getText();
+  const visibleRanges = editor.visibleRanges;
 
-  let stack: number[] = [];
+  for (const visible of visibleRanges) {
+    const text = doc.getText(visible);
+    const baseOffset = doc.offsetAt(visible.start);
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
+    const pos = editor.selection.active;
+    const cursorOffset = doc.offsetAt(pos);
 
-    if (char === "{") {
-      stack.push(i);
-    }
+    let stack: number[] = [];
 
-    if (char === "}") {
-      const start = stack.pop();
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
 
-      if (start !== undefined) {
-        const startPos = doc.positionAt(start);
-        const endPos = doc.positionAt(i + 1);
+      if (char === "{") {
+        stack.push(i);
+      }
 
-        if (pos.isAfterOrEqual(startPos) && pos.isBeforeOrEqual(endPos)) {
-          const range = new vscode.Range(startPos, endPos);
-          editor.setDecorations(scopeDecoration, [range]);
-          return;
+      if (char === "}") {
+        const start = stack.pop();
+
+        if (start !== undefined) {
+          const absStart = baseOffset + start;
+          const absEnd = baseOffset + i;
+
+          if (cursorOffset >= absStart && cursorOffset <= absEnd) {
+            editor.setDecorations(scopeDecoration, [
+              new vscode.Range(
+                doc.positionAt(absStart),
+                doc.positionAt(absEnd + 1),
+              ),
+            ]);
+            return;
+          }
         }
       }
     }
