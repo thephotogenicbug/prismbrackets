@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { matchDecoration } from "../decorations/decorations";
-import { buildIgnoreMap } from "../utils/parser";
+import { getIgnoreMap } from "../utils/parserCache";
 
 export function highlightMatchingBracket(editor: vscode.TextEditor) {
   const doc = editor.document;
@@ -12,7 +12,7 @@ export function highlightMatchingBracket(editor: vscode.TextEditor) {
   const text = doc.getText(visible);
   const baseOffset = doc.offsetAt(visible.start);
 
-  const { ignore } = buildIgnoreMap(text, doc.languageId);
+  const { ignore } = getIgnoreMap(text, doc.languageId);
 
   let index = doc.offsetAt(editor.selection.active) - baseOffset;
 

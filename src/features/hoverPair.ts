@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { hoverPairDecoration } from "../decorations/decorations";
-import { buildIgnoreMap } from "../utils/parser";
+import { getIgnoreMap } from "../utils/parserCache";
 
 export function highlightHoverPair(editor: vscode.TextEditor) {
   const doc = editor.document;
@@ -12,7 +12,7 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
   const text = doc.getText(visible);
   const baseOffset = doc.offsetAt(visible.start);
 
-  const { ignore } = buildIgnoreMap(text, doc.languageId);
+  const { ignore } = getIgnoreMap(text, doc.languageId);
 
   const pos = editor.selection.active;
   const offset = doc.offsetAt(pos) - baseOffset;
@@ -45,12 +45,10 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
 
   if (pairs[char]) {
     let depth = 0;
-
     for (let i = offset; i < text.length; i++) {
       if (ignore[i]) {
         continue;
       }
-
       if (text[i] === char) {
         depth++;
       } else if (text[i] === pairs[char]) {
@@ -64,12 +62,10 @@ export function highlightHoverPair(editor: vscode.TextEditor) {
     }
   } else {
     let depth = 0;
-
     for (let i = offset; i >= 0; i--) {
       if (ignore[i]) {
         continue;
       }
-
       if (text[i] === char) {
         depth++;
       } else if (text[i] === reverse[char]) {

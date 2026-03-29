@@ -2,10 +2,10 @@ import { buildIgnoreMap } from "./parser";
 
 let lastText = "";
 let lastLang = "";
-let lastResult: any = null;
+let lastResult: ReturnType<typeof buildIgnoreMap> | null = null;
 
 export function getIgnoreMap(text: string, lang: string) {
-  if (text === lastText && lang === lastLang) {
+  if (text === lastText && lang === lastLang && lastResult) {
     return lastResult;
   }
 

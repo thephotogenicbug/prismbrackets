@@ -1,21 +1,16 @@
 import * as vscode from "vscode";
 import { errorDecoration } from "../decorations/decorations";
-import { buildIgnoreMap } from "../utils/parser";
+import { getIgnoreMap } from "../utils/parserCache";
 
 export function highlightBracketErrors(editor: vscode.TextEditor) {
   const doc = editor.document;
-  const visible = editor.visibleRanges[0];
-  if (!visible) {
-    return;
-  }
 
-  const text = doc.getText(visible);
-  const baseOffset = doc.offsetAt(visible.start);
-
-  const { ignore } = buildIgnoreMap(text, doc.languageId);
+  // full document parsing
+  const text = doc.getText();
+  const { ignore } = getIgnoreMap(text, doc.languageId);
 
   const stack: { char: string; index: number }[] = [];
-  const errorRanges: vscode.Range[] = [];
+  const errorIndices: number[] = [];
 
   const pairs: Record<string, string> = {
     "(": ")",
@@ -38,26 +33,35 @@ export function highlightBracketErrors(editor: vscode.TextEditor) {
       const last = stack[stack.length - 1];
 
       if (!last || pairs[last.char] !== char) {
-        errorRanges.push(
-          new vscode.Range(
-            doc.positionAt(baseOffset + i),
-            doc.positionAt(baseOffset + i + 1),
-          ),
-        );
+        errorIndices.push(i);
       } else {
         stack.pop();
       }
     }
   }
 
-  // unmatched opening brackets
+  // unmatched openings
   for (const item of stack) {
-    errorRanges.push(
-      new vscode.Range(
-        doc.positionAt(baseOffset + item.index),
-        doc.positionAt(baseOffset + item.index + 1),
-      ),
-    );
+    errorIndices.push(item.index);
+  }
+
+  // filter only visible  range
+  const visible = editor.visibleRanges[0];
+  if (!visible) {
+    return;
+  }
+
+  const start = doc.offsetAt(visible.start);
+  const end = doc.offsetAt(visible.end);
+
+  const errorRanges: vscode.Range[] = [];
+
+  for (const i of errorIndices) {
+    if (i >= start && i <= end) {
+      errorRanges.push(
+        new vscode.Range(doc.positionAt(i), doc.positionAt(i + 1)),
+      );
+    }
   }
 
   editor.setDecorations(errorDecoration, errorRanges);

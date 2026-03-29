@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.3] - 2026-03-29
+
+### 🐛 Fixes
+- Fixed bracket colors changing when scrolling
+- Fixed incorrect nesting depth caused by visible-range-only parsing
+- Fixed false error highlights for brackets outside visible range
+- Fixed inconsistent coloring when opening new files
+- Fixed partial rendering issues in large files
+
+### ⚡ Improvements
+- Switched to full-document depth calculation for consistent bracket coloring
+- Improved rendering stability during scrolling
+- Enhanced synchronization between colorization and error detection
+- Better handling of large files with progressive rendering
+
+---
+
 ## [0.2.2] - 2026-03-29
 
 ### ✨ Added

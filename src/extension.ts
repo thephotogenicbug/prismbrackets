@@ -17,6 +17,32 @@ import { applyFocusMode } from "./features/focus";
 import { highlightHoverPair } from "./features/hoverPair";
 
 export function activate(context: vscode.ExtensionContext) {
+  // changelog on update
+  const currentVersion = context.extension.packageJSON.version;
+  const previousVersion = context.globalState.get<string>(
+    "prismbrackets.version",
+  );
+
+  if (previousVersion !== currentVersion) {
+    context.globalState.update("prismbrackets.version", currentVersion);
+
+    vscode.window
+      .showInformationMessage(
+        `Prism Brackets updated to v${currentVersion}`,
+        "View Changelog",
+      )
+      .then((selection) => {
+        if (selection === "View Changelog") {
+          const changelogPath = vscode.Uri.file(
+            context.asAbsolutePath("CHANGELOG.md"),
+          );
+
+          vscode.commands.executeCommand("markdown.showPreview", changelogPath);
+        }
+      });
+  }
+  // ----------------------------------------
+
   let colors = generateColors(60);
 
   // initialize decorations
@@ -47,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
     highlightHoverPair(editor);
   };
 
-  // Statusbar
+  // statusbar
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100,
@@ -71,21 +97,25 @@ export function activate(context: vscode.ExtensionContext) {
   // initial run
   const editor = vscode.window.activeTextEditor;
   if (editor) {
-    runHeavy(editor);
-    runLight(editor);
+    setTimeout(() => {
+      runHeavy(editor);
+      runLight(editor);
+    }, 50);
   }
 
   // editor switch
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
-        runHeavy(editor);
-        runLight(editor);
+        setTimeout(() => {
+          runHeavy(editor);
+          runLight(editor);
+        }, 50);
       }
     }),
   );
 
-  // document changes → heavy
+  // document change
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument((event) => {
       const editor = vscode.window.activeTextEditor;
@@ -95,10 +125,28 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
-  // cursor movement
+  // cursor move
   context.subscriptions.push(
     vscode.window.onDidChangeTextEditorSelection((event) => {
       runLight(event.textEditor);
+    }),
+  );
+
+  // new file open
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument((doc) => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor && editor.document === doc) {
+        runHeavy(editor);
+        runLight(editor);
+      }
+    }),
+  );
+
+  // visible range
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorVisibleRanges((event) => {
+      runHeavy(event.textEditor);
     }),
   );
 

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { isEnabled } from "../state";
 import { decorationTypes } from "../decorations/decorations";
-import { buildIgnoreMap } from "../utils/parser";
+import { getIgnoreMap } from "../utils/parserCache";
 
 export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
   if (!isEnabled) {
@@ -14,17 +14,9 @@ export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
     return;
   }
 
-  const visible = editor.visibleRanges[0];
-  if (!visible) {
-    return;
-  }
-
-  const text = doc.getText(visible);
-  const baseOffset = doc.offsetAt(visible.start);
-
-  const { ignore } = buildIgnoreMap(text, doc.languageId);
-
-  const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
+  // FULL TEXT for correct depth calculation
+  const fullText = doc.getText();
+  const { ignore } = getIgnoreMap(fullText, doc.languageId);
 
   const stack: string[] = [];
   const depthMap: number[] = [];
@@ -35,18 +27,20 @@ export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
     "[": "]",
   };
 
-  for (let i = 0; i < text.length; i++) {
+  // compute depth for entire document
+  for (let i = 0; i < fullText.length; i++) {
     if (ignore[i]) {
       continue;
     }
 
-    const c = text[i];
+    const c = fullText[i];
 
     if ("({[".includes(c)) {
       stack.push(c);
       depthMap[i] = stack.length - 1;
     } else if (")}]".includes(c)) {
       const last = stack[stack.length - 1];
+
       if (last && pairs[last] === c) {
         depthMap[i] = stack.length - 1;
         stack.pop();
@@ -56,12 +50,23 @@ export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
     }
   }
 
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
+  // only render visible range
+  const visible = editor.visibleRanges[0];
+  if (!visible) {
+    return;
+  }
 
+  const start = doc.offsetAt(visible.start);
+  const end = doc.offsetAt(visible.end);
+
+  const decorations: vscode.DecorationOptions[][] = colors.map(() => []);
+
+  for (let i = start; i < end; i++) {
     if (ignore[i]) {
       continue;
     }
+
+    const c = fullText[i];
     if (!"(){}[]".includes(c)) {
       continue;
     }
@@ -69,10 +74,7 @@ export function colorizeBrackets(editor: vscode.TextEditor, colors: string[]) {
     const depth = (depthMap[i] ?? 0) % colors.length;
 
     decorations[depth].push({
-      range: new vscode.Range(
-        doc.positionAt(baseOffset + i),
-        doc.positionAt(baseOffset + i + 1),
-      ),
+      range: new vscode.Range(doc.positionAt(i), doc.positionAt(i + 1)),
     });
   }
 

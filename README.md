@@ -21,7 +21,8 @@ Fast, zero-lag rainbow bracket highlighting with scope visualization, vertical g
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.2.2-blue" />
+  <img src="https://img.shields.io/github/v/release/thephotogenicbug/prismbrackets?label=version" />
+ 
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/VSCode-Extension-blue?logo=visualstudiocode" />
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen" />
@@ -41,7 +42,7 @@ Fast, zero-lag rainbow bracket highlighting with scope visualization, vertical g
 
 ## 🚀 Overview
 
-**PrismBrackets** enhances your coding experience with:
+**Prism Brackets** enhances your coding experience with:
 
 - 🌈 Depth-based rainbow bracket highlighting
 - 🎨 Advanced color system (less repetition, better spacing)
@@ -91,7 +92,7 @@ Designed for **clarity, performance, and developer productivity**.
 
 ---
 
-## 🎯 Focus Mode
+## Focus Mode
 
 <p align="center">
   <img src="assets/focus_mode.png" width="700"/>
@@ -99,22 +100,23 @@ Designed for **clarity, performance, and developer productivity**.
 
 ---
 
-## 🧪 Example
+## Example
 
-````js
+```js
 function example() {
   return 1 + 2 * (3 + 4 * (5 + 6));
 }
+```
 
-## 📦 Installation
+## Installation
 
 ```bash
 ext install Naveendev.prismbrackets
-````
+```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 ```bash
 git clone https://github.com/thephotogenicbug/prismbrackets.git
@@ -123,7 +125,7 @@ npm install
 npm run watch
 ```
 
-## 🧠 Project Structure
+## Project Structure
 
 ```bash
 src/
@@ -149,4 +151,4 @@ src/
 
 ---
 
-<p align="center"> Made with ❤️ by Naveen </p> ```
+<p align="center"> Made with ❤️ by Naveen </p>

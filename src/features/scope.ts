@@ -14,6 +14,11 @@ export function highlightScope(editor: vscode.TextEditor) {
   const scopeBorderDecoration = getScopeBorderDecoration();
   const scopeLineDecoration = getScopeLineDecoration();
 
+  // ]clear ALL decorations first
+  editor.setDecorations(scopeDecoration, []);
+  editor.setDecorations(scopeBorderDecoration, []);
+  editor.setDecorations(scopeLineDecoration, []);
+
   for (const visible of visibleRanges) {
     const text = doc.getText(visible);
     const baseOffset = doc.offsetAt(visible.start);
@@ -34,6 +39,7 @@ export function highlightScope(editor: vscode.TextEditor) {
           const absStart = baseOffset + start;
           const absEnd = baseOffset + i;
 
+          // skip tiny scopes
           if (absEnd - absStart < 20) {
             continue;
           }
@@ -44,9 +50,11 @@ export function highlightScope(editor: vscode.TextEditor) {
 
             const range = new vscode.Range(startPos, endPos);
 
+            // apply scope highlight
             editor.setDecorations(scopeDecoration, [range]);
             editor.setDecorations(scopeBorderDecoration, [range]);
 
+            // vertical guide lines
             const lines: vscode.Range[] = [];
 
             for (let l = startPos.line; l <= endPos.line; l++) {
@@ -62,7 +70,4 @@ export function highlightScope(editor: vscode.TextEditor) {
       }
     }
   }
-
-  editor.setDecorations(scopeDecoration, []);
-  editor.setDecorations(scopeLineDecoration, []);
 }

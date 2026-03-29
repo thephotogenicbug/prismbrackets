@@ -28,7 +28,9 @@ export function registerTooltip(context: vscode.ExtensionContext) {
         "]": "Square Bracket [ ]",
       };
 
-      if (!pairs[char] && !reverse[char]) return;
+      if (!pairs[char] && !reverse[char]) {
+        return;
+      }
 
       let matchIndex: number | null = null;
 
@@ -123,10 +125,15 @@ function findMatchingForward(
   let depth = 0;
 
   for (let i = start; i < text.length; i++) {
-    if (text[i] === open) depth++;
-    else if (text[i] === close) depth--;
+    if (text[i] === open) {
+      depth++;
+    } else if (text[i] === close) {
+      depth--;
+    }
 
-    if (depth === 0) return i;
+    if (depth === 0) {
+      return i;
+    }
   }
 
   return null;
@@ -141,10 +148,15 @@ function findMatchingBackward(
   let depth = 0;
 
   for (let i = start; i >= 0; i--) {
-    if (text[i] === close) depth++;
-    else if (text[i] === open) depth--;
+    if (text[i] === close) {
+      depth++;
+    } else if (text[i] === open) {
+      depth--;
+    }
 
-    if (depth === 0) return i;
+    if (depth === 0) {
+      return i;
+    }
   }
 
   return null;
@@ -153,15 +165,33 @@ function findMatchingBackward(
 function detectScopeType(text: string, index: number): string {
   const before = text.slice(Math.max(0, index - 80), index).toLowerCase();
 
-  if (before.includes("function")) return "Function";
-  if (before.includes("class")) return "Class";
-  if (before.includes("if")) return "If Condition";
-  if (before.includes("else")) return "Else Block";
-  if (before.includes("for")) return "For Loop";
-  if (before.includes("while")) return "While Loop";
-  if (before.includes("switch")) return "Switch";
-  if (before.includes("try")) return "Try Block";
-  if (before.includes("catch")) return "Catch Block";
+  if (before.includes("function")) {
+    return "Function";
+  }
+  if (before.includes("class")) {
+    return "Class";
+  }
+  if (before.includes("if")) {
+    return "If Condition";
+  }
+  if (before.includes("else")) {
+    return "Else Block";
+  }
+  if (before.includes("for")) {
+    return "For Loop";
+  }
+  if (before.includes("while")) {
+    return "While Loop";
+  }
+  if (before.includes("switch")) {
+    return "Switch";
+  }
+  if (before.includes("try")) {
+    return "Try Block";
+  }
+  if (before.includes("catch")) {
+    return "Catch Block";
+  }
 
   return "Block";
 }
